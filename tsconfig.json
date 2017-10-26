@@ -2,6 +2,9 @@
     "compilerOptions": {
         "module": "commonjs",
         "target": "es5",
+        "lib": [
+            "es2015"
+        ],
         "sourceMap": true,
         "moduleResolution": "node",
         "rootDir": "./src",

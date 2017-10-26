@@ -5,7 +5,9 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "test": "mocha -r ts-node/register tests/**/*.ts"
+    "clean": "rimraf dist",
+    "pretest": "npm run clean & npm run build",
+    "test": "mocha dist/tests/**/*.js"
   },
   "author": "Stefan Szarek",
   "license": "ISC",
@@ -14,6 +16,7 @@
     "@types/mocha": "^2.2.44",
     "chai": "^4.1.2",
     "mocha": "^4.0.1",
+    "rimraf": "^2.6.2",
     "ts-node": "^3.3.0",
     "tslint": "^5.8.0",
     "typescript": "^2.5.3"
