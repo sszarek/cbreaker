@@ -1,5 +1,5 @@
+import {Command} from "./Command";
 import Configuration from "./Configuration";
-import {Command} from "./ICommand";
 
 export class CircuitBreaker {
     private config: Configuration;

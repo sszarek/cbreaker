@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "es5",
+        "sourceMap": true,
+        "moduleResolution": "node",
+        "rootDir": "./src",
+        "outDir": "./dist"
+    },
+    "exclude": [
+        "node_modules", "dist", "tests"
+    ]
+}

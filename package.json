@@ -2,8 +2,9 @@
   "name": "cbreaker",
   "version": "1.0.0",
   "description": "Simple circuit breaker implementation",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
+    "build": "tsc",
     "test": "mocha -r ts-node/register tests/**/*.ts"
   },
   "author": "Stefan Szarek",
