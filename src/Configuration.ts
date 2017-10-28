@@ -1,4 +1,6 @@
-export default class Configuration {
-    public numberOfFailures: number;
-    public timeoutMs: number;
+
+import { Command } from "./Command";
+
+export default interface Configuration {
+    fallback?: Command;
 }
