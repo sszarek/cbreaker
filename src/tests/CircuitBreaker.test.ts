@@ -74,5 +74,9 @@ describe("CircuitBreaker", () => {
                 });
             }
         });
+
+        it("should reset data after time frame ends", async() => {
+
+        });
     });
 });
