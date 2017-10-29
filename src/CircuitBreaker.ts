@@ -1,5 +1,6 @@
 import { Command } from "./Command";
 import Configuration from "./Configuration";
+import Stats from "./Stats";
 
 enum CircuitState {
     Opened,
@@ -9,6 +10,8 @@ enum CircuitState {
 export class CircuitBreaker {
     private circuitState: CircuitState = CircuitState.Closed;
     private fallback: Command;
+    private successful: number = 0;
+    private failed: number = 0;
 
     constructor(config: Configuration) {
         this.fallback = config.fallback || (() => { throw new Error("Circuit opened.") });
@@ -16,7 +19,14 @@ export class CircuitBreaker {
 
     public async execute(command: Command): Promise<any> {
         if (this.circuitState === CircuitState.Closed) {
-            return command();
+            try {
+                const result = await command();
+                this.successful++;
+                return result;
+            } catch(e) {
+                this.failed++;
+                throw e;
+            }
         } else {
             return this.fallback();
         }
@@ -28,5 +38,12 @@ export class CircuitBreaker {
 
     public forceClose() {
         this.circuitState = CircuitState.Closed;
+    }
+
+    public getStats(): Stats {
+        return {
+            successful: this.successful,
+            failed: this.failed
+        };
     }
 }

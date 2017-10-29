@@ -45,4 +45,34 @@ describe("CircuitBreaker", () => {
             expect.fail(true, false, "Expected error to be thrown");
         });
     });
+
+    describe("Counting failed and successful commands", () => {
+        it("counts successfult command", async () => {
+            const commandStub = stub().resolves();
+            const breaker = new CircuitBreaker({});
+
+            await breaker.execute(commandStub);
+
+            expect(breaker.getStats()).to.be.deep.equal({
+                successful: 1,
+                failed: 0,
+            });
+        });
+
+        it("counts failed commands", async () => {
+            const commandStub = stub().rejects();
+            const breaker = new CircuitBreaker({});
+
+            try {
+                await breaker.execute(commandStub);
+            } catch (e) {
+
+            } finally {
+                expect(breaker.getStats()).to.be.deep.equal({
+                    successful: 0,
+                    failed: 1
+                });
+            }
+        });
+    });
 });
