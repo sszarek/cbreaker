@@ -4,7 +4,7 @@ import Bucket from "./Bucket";
 export default class TimeFrame {
     private bucketLengthMs: number;
     private bucketsCnt: number;
-    private buckets: Array<Bucket>;
+    private buckets: Array<Bucket> = [];
     private activeBucket: Bucket;
 
     constructor(lengthMs: number, buckets: number) {
