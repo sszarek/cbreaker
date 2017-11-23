@@ -14,17 +14,27 @@ export default class TimeFrame {
         this.startMovingFrame();
     }
 
-    private async startMovingFrame() {
-        while (true) {
-            this.activeBucket = new Bucket();
-            this.buckets.push(this.activeBucket);
-            
-            await timeout(this.bucketLengthMs);
-            
-            if (this.buckets.length >= this.bucketsCnt) {
-                this.buckets.shift();
-            }
+    private moveFrame = () => {
+        if (this.buckets.length >= this.bucketsCnt) {
+            this.removeBucket();
         }
+
+        this.addBucket();
+    }
+
+    private async startMovingFrame() {
+        this.addBucket();
+        
+        setInterval(this.moveFrame, this.bucketLengthMs);
+    }
+
+    private addBucket() {
+        this.activeBucket = new Bucket();
+        this.buckets.push(this.activeBucket);
+    }
+
+    private removeBucket() {
+        this.buckets.shift();
     }
 
     public recordFailure() {
