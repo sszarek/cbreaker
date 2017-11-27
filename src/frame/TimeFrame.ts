@@ -1,5 +1,6 @@
 import { timeout } from "../helpers";
 import Bucket from "./Bucket";
+import Stats from "./Stats";
 
 export default class TimeFrame {
     private bucketLengthMs: number;
@@ -24,7 +25,7 @@ export default class TimeFrame {
 
     private async startMovingFrame() {
         this.addBucket();
-        
+
         setInterval(this.moveFrame, this.bucketLengthMs);
     }
 
@@ -45,15 +46,12 @@ export default class TimeFrame {
         this.activeBucket.successful++;
     }
 
-    public getStats() {
-        return this.buckets.reduce((acc, bucket) => {
+    public getStats(): Stats {
+        return this.buckets.reduce<Stats>((acc, bucket) => {
             acc.failed += bucket.failed;
             acc.successful += bucket.successful;
 
             return acc;
-        }, {
-                successful: 0,
-                failed: 0
-            });
+        }, new Stats());
     }
 }

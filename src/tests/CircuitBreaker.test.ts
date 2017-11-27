@@ -1,82 +1,149 @@
 import { expect } from "chai";
 import { CircuitBreaker } from "../CircuitBreaker";
 import Configuration from "../Configuration";
-import { stub } from "sinon";
+import { stub, useFakeTimers } from "sinon";
+import { equal } from "assert";
+import { assertStatsEqual } from "./utils";
+
+const defaultConfig: Configuration = {
+    errorThreshold: 50,
+    timeFrameLength: 100,
+    numberOfBuckets: 10
+}
 
 describe("CircuitBreaker", () => {
     describe("Circuit closed", () => {
+        let clock: sinon.SinonFakeTimers;
+
+        beforeEach(() => {
+            clock = useFakeTimers();
+        });
+
         it("executes command", async () => {
             const commandStub = stub().resolves();
-            const breaker = new CircuitBreaker({});
+            const breaker = new CircuitBreaker(defaultConfig);
 
             await breaker.execute(commandStub);
 
             expect(commandStub.callCount).to.equal(1);
         });
+
+        afterEach(() => {
+            clock.restore();
+        });
     });
 
     describe("Circuit opened", () => {
-        it("does not execute command but configured fallback", async () => {
-            const commandStub = stub().resolves();
-            const fallbackStub = stub().resolves();
-            const breaker = new CircuitBreaker({
-                fallback: fallbackStub
-            });
-            breaker.forceOpen();
+        let clock: sinon.SinonFakeTimers;
 
-            await breaker.execute(commandStub);
+        beforeEach(() => {
+            clock = useFakeTimers();
+        })
 
-            expect(commandStub.callCount).to.equal(0);
-            expect(fallbackStub.callCount).to.equal(1);
-        });
-
-        it("executes default fallback if not set", async () => {
-            const commandStub = stub().resolves();
-            const breaker = new CircuitBreaker({});
-            breaker.forceOpen();
-
-            try {
-                await breaker.execute(commandStub);
-            } catch (e) {
-                expect(e.message).to.equal("Circuit opened.");
-                return;
-            }
-
-            expect.fail(true, false, "Expected error to be thrown");
-        });
+        afterEach(() => {
+            clock.restore();
+        })
     });
 
     describe("Counting failed and successful commands", () => {
+        let clock: sinon.SinonFakeTimers;
+
+        beforeEach(() => {
+            clock = useFakeTimers();
+        });
+
         it("counts successfult command", async () => {
             const commandStub = stub().resolves();
-            const breaker = new CircuitBreaker({});
+            const breaker = new CircuitBreaker(defaultConfig);
 
             await breaker.execute(commandStub);
 
-            expect(breaker.getStats()).to.be.deep.equal({
+            assertStatsEqual(breaker.getStats(), {
                 successful: 1,
-                failed: 0,
+                failed: 0
             });
         });
 
         it("counts failed commands", async () => {
             const commandStub = stub().rejects();
-            const breaker = new CircuitBreaker({});
+            const breaker = new CircuitBreaker(defaultConfig);
 
             try {
                 await breaker.execute(commandStub);
             } catch (e) {
 
             } finally {
-                expect(breaker.getStats()).to.be.deep.equal({
+                assertStatsEqual(breaker.getStats(), {
                     successful: 0,
                     failed: 1
                 });
             }
         });
 
-        it("should reset data after time frame ends", async() => {
+        it("should reset data after time frame ends", async () => {
+            const commandStub = stub().rejects();
+            const breaker = new CircuitBreaker(defaultConfig);
 
+            try {
+                await breaker.execute(commandStub);
+            } catch (e) {
+
+            } finally {
+                clock.tick(110);
+                assertStatsEqual(breaker.getStats(), {
+                    successful: 0,
+                    failed: 0
+                });
+            }
+        });
+
+        afterEach(() => {
+            clock.restore();
+        });
+    });
+
+    describe("Reacting to failures", () => {
+        let clock: sinon.SinonFakeTimers;
+
+        beforeEach(() => {
+            clock = useFakeTimers();
+        });
+
+        it("opens the circuit if error count exceeds the threshold", async () => {
+            const commandStub = stub().rejects();
+            const breaker = new CircuitBreaker(defaultConfig);
+
+            try {
+                await breaker.execute(commandStub);
+            } catch (e) {
+
+            } finally {
+                expect(breaker.isCircuitClosed()).to.be.false;
+            }
+        });
+
+        it("closes the circuit if error count drops below threshold" , async () => {
+            const failedCommandStub = stub().rejects();
+            const successfulCommandStub = stub().resolves();
+            const breaker = new CircuitBreaker({
+                errorThreshold: 10,
+                timeFrameLength: 100,
+                numberOfBuckets: 10
+            });
+
+            try {
+                await breaker.execute(failedCommandStub);
+            } catch (e) {
+                
+            } finally {
+                clock.tick(101);
+                await breaker.execute(successfulCommandStub);
+                expect(breaker.isCircuitClosed()).to.be.true;
+            }
+        });
+
+        afterEach(() => {
+            clock.restore();
         });
     });
 });

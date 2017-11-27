@@ -3,6 +3,7 @@ import TimeFrame from "../../frame/TimeFrame";
 import { timeout } from "../../helpers";
 import { stub, useFakeTimers } from "sinon";
 import { setImmediate } from "timers";
+import { assertStatsEqual } from "../utils";
 
 describe("TimeFrame", () => {
     let clock: sinon.SinonFakeTimers;
@@ -15,7 +16,7 @@ describe("TimeFrame", () => {
         const frame = new TimeFrame(200, 2);
         frame.recordSuccess();
 
-        expect(frame.getStats()).to.be.deep.equal({
+        assertStatsEqual(frame.getStats(), {
             successful: 1,
             failed: 0
         });
@@ -28,7 +29,7 @@ describe("TimeFrame", () => {
         frame.recordFailure();
         clock.tick(500);
 
-        expect(frame.getStats()).to.be.deep.equal({
+        assertStatsEqual(frame.getStats(), {
             successful: 2,
             failed: 1
         });
@@ -39,13 +40,13 @@ describe("TimeFrame", () => {
         frame.recordSuccess();
         clock.tick(201);
 
-        expect(frame.getStats()).to.be.deep.equal({
+        assertStatsEqual(frame.getStats(), {
             successful: 0,
             failed: 0,
         });
     });
 
-    it("removes only those data that falls out of time frame", async() => {
+    it("removes only those data that falls out of time frame", async () => {
         const frame = new TimeFrame(1000, 10);
         frame.recordSuccess();
         clock.tick(100);
@@ -53,7 +54,7 @@ describe("TimeFrame", () => {
         frame.recordFailure();
         clock.tick(901);
 
-        expect(frame.getStats()).to.be.deep.equal({
+        assertStatsEqual(frame.getStats(), {
             successful: 1,
             failed: 1
         });

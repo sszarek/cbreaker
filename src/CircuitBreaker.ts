@@ -1,30 +1,37 @@
 import { Command } from "./Command";
 import Configuration from "./Configuration";
-import Stats from "./Stats";
-
-enum CircuitState {
-    Opened,
-    Closed
-}
+import TimeFrame from "./frame/TimeFrame";
 
 export class CircuitBreaker {
-    private circuitState: CircuitState = CircuitState.Closed;
+    private isClosed: boolean = true;
     private fallback: Command;
-    private successful: number = 0;
-    private failed: number = 0;
+    private timeFrame: TimeFrame;
+    private errorThreshold: number;
 
     constructor(config: Configuration) {
         this.fallback = config.fallback || (() => { throw new Error("Circuit opened.") });
+        this.errorThreshold = config.errorThreshold;
+
+        this.timeFrame = new TimeFrame(config.timeFrameLength, config.numberOfBuckets);
     }
 
     public async execute(command: Command): Promise<any> {
-        if (this.circuitState === CircuitState.Closed) {
+        if (!this.shouldOpenCircuit()) {
+            this.isClosed = true;
+        }
+
+        if (this.isClosed) {
             try {
                 const result = await command();
-                this.successful++;
+                this.timeFrame.recordSuccess();
                 return result;
-            } catch(e) {
-                this.failed++;
+            } catch (e) {
+                this.timeFrame.recordFailure();
+
+                if (this.shouldOpenCircuit()) {
+                    this.forceOpen();
+                }
+
                 throw e;
             }
         } else {
@@ -33,17 +40,22 @@ export class CircuitBreaker {
     }
 
     public forceOpen() {
-        this.circuitState = CircuitState.Opened;
+        this.isClosed = false;
     }
 
     public forceClose() {
-        this.circuitState = CircuitState.Closed;
+        this.isClosed = true;
     }
 
-    public getStats(): Stats {
-        return {
-            successful: this.successful,
-            failed: this.failed
-        };
+    public isCircuitClosed(): boolean {
+        return this.isClosed;
+    }
+
+    public getStats() {
+        return this.timeFrame.getStats();
+    }
+
+    private shouldOpenCircuit() {
+        return this.timeFrame.getStats().calculateErrorThreshold() >= this.errorThreshold;
     }
 }
