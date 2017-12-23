@@ -7,11 +7,13 @@
         ],
         "sourceMap": true,
         "moduleResolution": "node",
-        "strict": true,
-        "rootDir": "./src",
+        "noImplicitThis": true,
+        "alwaysStrict": true,
+        "strictNullChecks": true,
+        "strictFunctionTypes": true,
         "outDir": "./dist"
     },
-    "exclude": [
-        "node_modules", "dist", "tests"
+    "include": [
+        "src/**/*.ts"
     ]
 }

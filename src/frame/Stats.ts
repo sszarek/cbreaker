@@ -6,4 +6,4 @@ export default class Stats {
 
         return sum ? (this.failed * 100) / sum : 0;
     }
-};
+}

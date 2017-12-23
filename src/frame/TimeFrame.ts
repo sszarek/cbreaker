@@ -5,7 +5,7 @@ import Stats from "./Stats";
 export default class TimeFrame {
     private bucketLengthMs: number;
     private bucketsCnt: number;
-    private buckets: Array<Bucket> = [];
+    private buckets: Bucket[] = [];
     private activeBucket: Bucket;
 
     constructor(lengthMs: number, buckets: number) {
@@ -13,6 +13,23 @@ export default class TimeFrame {
         this.bucketLengthMs = lengthMs / buckets;
 
         this.startMovingFrame();
+    }
+
+    public recordFailure() {
+        this.activeBucket.failed++;
+    }
+
+    public recordSuccess() {
+        this.activeBucket.successful++;
+    }
+
+    public getStats(): Stats {
+        return this.buckets.reduce<Stats>((acc, bucket) => {
+            acc.failed += bucket.failed;
+            acc.successful += bucket.successful;
+
+            return acc;
+        }, new Stats());
     }
 
     private moveFrame = () => {
@@ -36,22 +53,5 @@ export default class TimeFrame {
 
     private removeBucket() {
         this.buckets.shift();
-    }
-
-    public recordFailure() {
-        this.activeBucket.failed++;
-    }
-
-    public recordSuccess() {
-        this.activeBucket.successful++;
-    }
-
-    public getStats(): Stats {
-        return this.buckets.reduce<Stats>((acc, bucket) => {
-            acc.failed += bucket.failed;
-            acc.successful += bucket.successful;
-
-            return acc;
-        }, new Stats());
     }
 }

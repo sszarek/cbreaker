@@ -1,5 +1,5 @@
 import { Command } from "./Command";
-import Configuration from "./Configuration";
+import IConfiguration from "./Configuration";
 import TimeFrame from "./frame/TimeFrame";
 
 export class CircuitBreaker {
@@ -8,8 +8,8 @@ export class CircuitBreaker {
     private timeFrame: TimeFrame;
     private errorThreshold: number;
 
-    constructor(config: Configuration) {
-        this.fallback = config.fallback || (() => { throw new Error("Circuit opened.") });
+    constructor(config: IConfiguration) {
+        this.fallback = config.fallback || (() => { throw new Error("Circuit opened."); });
         this.errorThreshold = config.errorThreshold;
 
         this.timeFrame = new TimeFrame(config.timeFrameLength, config.numberOfBuckets);

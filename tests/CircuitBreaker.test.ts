@@ -1,15 +1,15 @@
 import { expect } from "chai";
-import { CircuitBreaker } from "../CircuitBreaker";
-import Configuration from "../Configuration";
+import { CircuitBreaker } from "../src/CircuitBreaker";
+import IConfiguration from "../src/Configuration";
 import { stub, useFakeTimers } from "sinon";
 import { equal } from "assert";
 import { assertStatsEqual } from "./utils";
 
-const defaultConfig: Configuration = {
+const defaultConfig: IConfiguration = {
     errorThreshold: 50,
     timeFrameLength: 100,
-    numberOfBuckets: 10
-}
+    numberOfBuckets: 10,
+};
 
 describe("CircuitBreaker", () => {
     describe("Circuit closed", () => {
@@ -38,11 +38,11 @@ describe("CircuitBreaker", () => {
 
         beforeEach(() => {
             clock = useFakeTimers();
-        })
+        });
 
         afterEach(() => {
             clock.restore();
-        })
+        });
     });
 
     describe("Counting failed and successful commands", () => {
@@ -60,7 +60,7 @@ describe("CircuitBreaker", () => {
 
             assertStatsEqual(breaker.getStats(), {
                 successful: 1,
-                failed: 0
+                failed: 0,
             });
         });
 
@@ -92,7 +92,7 @@ describe("CircuitBreaker", () => {
                 clock.tick(110);
                 assertStatsEqual(breaker.getStats(), {
                     successful: 0,
-                    failed: 0
+                    failed: 0,
                 });
             }
         });

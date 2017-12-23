@@ -1,9 +1,9 @@
 
 import { Command } from "./Command";
 
-export default interface Configuration {
+export default interface IConfiguration {
     fallback?: Command;
-    errorThreshold: number,
-    timeFrameLength: number,
-    numberOfBuckets: number
+    errorThreshold: number;
+    timeFrameLength: number;
+    numberOfBuckets: number;
 }

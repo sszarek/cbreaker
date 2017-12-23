@@ -1,13 +1,14 @@
 {
   "name": "cbreaker",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Simple circuit breaker implementation",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
+    "compile": "tsc",
+    "build": "run-s clean lint test compile",
     "clean": "rimraf dist",
-    "pretest": "npm run clean & npm run build",
-    "test": "mocha --recursive dist/tests"
+    "lint": "tslint -c tslint.json src/**/*.ts",
+    "test": "mocha -r ts-node/register './tests/**/*.ts'"
   },
   "author": "Stefan Szarek",
   "license": "ISC",
@@ -18,6 +19,7 @@
     "@types/sinon": "^2.3.7",
     "chai": "^4.1.2",
     "mocha": "^4.0.1",
+    "npm-run-all": "^4.1.2",
     "rimraf": "^2.6.2",
     "sinon": "^4.0.2",
     "ts-node": "^3.3.0",

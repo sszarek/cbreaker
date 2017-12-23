@@ -1,6 +1,6 @@
 import { expect } from "chai";
-import TimeFrame from "../../frame/TimeFrame";
-import { timeout } from "../../helpers";
+import TimeFrame from "../../src/frame/TimeFrame";
+import { timeout } from "../../src/helpers";
 import { stub, useFakeTimers } from "sinon";
 import { setImmediate } from "timers";
 import { assertStatsEqual } from "../utils";
