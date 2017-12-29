@@ -1,1 +1,1 @@
-export type Command = () => Promise<any>;
+export type Command<T> = () => Promise<T>;

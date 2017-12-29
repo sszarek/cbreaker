@@ -1,9 +1,10 @@
 import { expect } from "chai";
-import { CircuitBreaker } from "../src/CircuitBreaker";
-import IConfiguration from "../src/Configuration";
 import { stub, useFakeTimers } from "sinon";
 import { equal } from "assert";
 import { assertStatsEqual } from "./utils";
+import { CircuitBreaker } from "../src/CircuitBreaker";
+import CircuitOpenedError from "../src/CircuitOpenedError";
+import IConfiguration from "../src/Configuration";
 
 const defaultConfig: IConfiguration = {
     errorThreshold: 50,
@@ -25,7 +26,7 @@ describe("CircuitBreaker", () => {
 
             await breaker.execute(commandStub);
 
-            expect(commandStub.callCount).to.equal(1);
+            expect(commandStub).to.have.been.calledOnce;
         });
 
         afterEach(() => {
@@ -35,9 +36,39 @@ describe("CircuitBreaker", () => {
 
     describe("Circuit opened", () => {
         let clock: sinon.SinonFakeTimers;
+        let breaker: CircuitBreaker;
 
-        beforeEach(() => {
+        // Executes failing Command in order to open the circuit
+        const openCircuit = async (breaker: CircuitBreaker) => {
+            try {
+                await breaker.execute(async () => { throw new Error('Some error') });
+            } catch (e) {
+            }
+        };
+
+        beforeEach(async () => {
             clock = useFakeTimers();
+            breaker = new CircuitBreaker({
+                errorThreshold: 10,
+                timeFrameLength: 100,
+                numberOfBuckets: 10
+            });
+
+            await openCircuit(breaker);
+        });
+
+        it("throws CircuitOpenedError", async () => {
+            const commandStub = stub().resolves();
+
+            await expect(breaker.execute(commandStub))
+                .to.eventually.be.rejectedWith(Error, "Can not execute command. Circuit is opened.");
+        });
+
+        it("does not execute command", async () => {
+            const commandStub = stub().resolves();
+
+            await expect(breaker.execute(commandStub)).to.eventually.be.rejected;
+            expect(commandStub).to.have.not.been.called;
         });
 
         afterEach(() => {
@@ -122,7 +153,7 @@ describe("CircuitBreaker", () => {
             }
         });
 
-        it("closes the circuit if error count drops below threshold" , async () => {
+        it("closes the circuit if error count drops below threshold", async () => {
             const failedCommandStub = stub().rejects();
             const successfulCommandStub = stub().resolves();
             const breaker = new CircuitBreaker({
@@ -134,7 +165,7 @@ describe("CircuitBreaker", () => {
             try {
                 await breaker.execute(failedCommandStub);
             } catch (e) {
-                
+
             } finally {
                 clock.tick(101);
                 await breaker.execute(successfulCommandStub);

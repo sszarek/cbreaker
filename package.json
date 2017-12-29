@@ -8,20 +8,24 @@
     "build": "run-s clean lint test compile",
     "clean": "rimraf dist",
     "lint": "tslint -c tslint.json src/**/*.ts",
-    "test": "mocha -r ts-node/register './tests/**/*.ts'"
+    "test": "mocha -r ts-node/register -r tests/setup.ts './tests/**/*.ts'"
   },
   "author": "Stefan Szarek",
   "license": "ISC",
   "devDependencies": {
     "@types/chai": "^4.0.4",
+    "@types/chai-as-promised": "^7.1.0",
     "@types/mocha": "^2.2.44",
     "@types/node": "^8.0.47",
     "@types/sinon": "^2.3.7",
+    "@types/sinon-chai": "^2.7.29",
     "chai": "^4.1.2",
+    "chai-as-promised": "^7.1.1",
     "mocha": "^4.0.1",
     "npm-run-all": "^4.1.2",
     "rimraf": "^2.6.2",
     "sinon": "^4.0.2",
+    "sinon-chai": "^2.14.0",
     "ts-node": "^3.3.0",
     "tslint": "^5.8.0",
     "typescript": "^2.5.3"
