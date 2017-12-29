@@ -67,7 +67,7 @@ describe("CircuitBreaker", () => {
         it("does not execute command", async () => {
             const commandStub = stub().resolves();
 
-            await expect(breaker.execute(commandStub)).to.eventually.be.rejected;
+            await expect(breaker.execute(commandStub)).to.be.rejected;
             expect(commandStub).to.have.not.been.called;
         });
 
@@ -99,33 +99,24 @@ describe("CircuitBreaker", () => {
             const commandStub = stub().rejects();
             const breaker = new CircuitBreaker(defaultConfig);
 
-            try {
-                await breaker.execute(commandStub);
-            } catch (e) {
-
-            } finally {
-                assertStatsEqual(breaker.getStats(), {
-                    successful: 0,
-                    failed: 1
-                });
-            }
+            await expect(breaker.execute(commandStub)).to.be.rejected;
+            assertStatsEqual(breaker.getStats(), {
+                successful: 0,
+                failed: 1
+            });
         });
 
         it("should reset data after time frame ends", async () => {
             const commandStub = stub().rejects();
             const breaker = new CircuitBreaker(defaultConfig);
 
-            try {
-                await breaker.execute(commandStub);
-            } catch (e) {
-
-            } finally {
-                clock.tick(110);
-                assertStatsEqual(breaker.getStats(), {
-                    successful: 0,
-                    failed: 0,
-                });
-            }
+            await expect(breaker.execute(commandStub)).to.be.rejected;
+            clock.tick(110);
+            
+            assertStatsEqual(breaker.getStats(), {
+                successful: 0,
+                failed: 0,
+            });
         });
 
         afterEach(() => {
@@ -144,13 +135,8 @@ describe("CircuitBreaker", () => {
             const commandStub = stub().rejects();
             const breaker = new CircuitBreaker(defaultConfig);
 
-            try {
-                await breaker.execute(commandStub);
-            } catch (e) {
-
-            } finally {
-                expect(breaker.isCircuitClosed()).to.be.false;
-            }
+            await expect(breaker.execute(commandStub)).to.be.rejected;
+            expect(breaker.isCircuitClosed()).to.be.false;
         });
 
         it("closes the circuit if error count drops below threshold", async () => {
@@ -162,15 +148,12 @@ describe("CircuitBreaker", () => {
                 numberOfBuckets: 10
             });
 
-            try {
-                await breaker.execute(failedCommandStub);
-            } catch (e) {
-
-            } finally {
-                clock.tick(101);
-                await breaker.execute(successfulCommandStub);
-                expect(breaker.isCircuitClosed()).to.be.true;
-            }
+            await expect(breaker.execute(failedCommandStub)).to.be.rejected;
+            
+            clock.tick(101);
+            
+            await breaker.execute(successfulCommandStub);
+            expect(breaker.isCircuitClosed()).to.be.true;
         });
 
         afterEach(() => {
