@@ -6,8 +6,8 @@ import Stats from "./frame/Stats";
 
 export class CircuitBreaker {
     private isClosed: boolean = true;
-    private timeFrame: TimeFrame;
     private errorThreshold: number;
+    private timeFrame: TimeFrame;
 
     constructor(config: IConfiguration) {
         this.errorThreshold = config.errorThreshold;

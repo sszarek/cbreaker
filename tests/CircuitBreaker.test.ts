@@ -12,6 +12,9 @@ const defaultConfig: IConfiguration = {
     numberOfBuckets: 10,
 };
 
+const CommandError: string = "CommandError";
+const createCommandError = () => new Error(CommandError);
+
 describe("CircuitBreaker", () => {
     describe("Circuit closed", () => {
         let clock: sinon.SinonFakeTimers;
@@ -107,10 +110,10 @@ describe("CircuitBreaker", () => {
         });
 
         it("should reset data after time frame ends", async () => {
-            const commandStub = stub().rejects();
+            const commandStub = stub().rejects(createCommandError());
             const breaker = new CircuitBreaker(defaultConfig);
 
-            await expect(breaker.execute(commandStub)).to.be.rejected;
+            await expect(breaker.execute(commandStub)).to.be.rejectedWith(CommandError);
             clock.tick(110);
             
             assertStatsEqual(breaker.getStats(), {
@@ -132,15 +135,15 @@ describe("CircuitBreaker", () => {
         });
 
         it("opens the circuit if error count exceeds the threshold", async () => {
-            const commandStub = stub().rejects();
+            const commandStub = stub().rejects(createCommandError());
             const breaker = new CircuitBreaker(defaultConfig);
 
-            await expect(breaker.execute(commandStub)).to.be.rejected;
+            await expect(breaker.execute(commandStub)).to.be.rejectedWith(CommandError);
             expect(breaker.isCircuitClosed()).to.be.false;
         });
 
         it("closes the circuit if error count drops below threshold", async () => {
-            const failedCommandStub = stub().rejects();
+            const failedCommandStub = stub().rejects(createCommandError());
             const successfulCommandStub = stub().resolves();
             const breaker = new CircuitBreaker({
                 errorThreshold: 10,
@@ -148,7 +151,7 @@ describe("CircuitBreaker", () => {
                 numberOfBuckets: 10
             });
 
-            await expect(breaker.execute(failedCommandStub)).to.be.rejected;
+            await expect(breaker.execute(failedCommandStub)).to.be.rejectedWith(CommandError);
             
             clock.tick(101);
             
