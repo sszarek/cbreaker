@@ -8,7 +8,7 @@
     "build": "run-s clean lint test compile",
     "clean": "rimraf dist",
     "lint": "tslint -c tslint.json src/**/*.ts",
-    "test": "mocha -r ts-node/register -r tests/setup.ts './tests/**/*.ts'"
+    "test": "nyc mocha -r ts-node/register --r source-map-support/register -r tests/setup.ts './tests/**/*.ts'"
   },
   "author": "Stefan Szarek",
   "license": "ISC",
@@ -23,11 +23,27 @@
     "chai-as-promised": "^7.1.1",
     "mocha": "^4.0.1",
     "npm-run-all": "^4.1.2",
+    "nyc": "^11.4.1",
     "rimraf": "^2.6.2",
     "sinon": "^4.0.2",
     "sinon-chai": "^2.14.0",
+    "source-map-support": "^0.5.0",
     "ts-node": "^3.3.0",
     "tslint": "^5.8.0",
     "typescript": "^2.5.3"
+  },
+  "nyc": {
+    "extension": [
+      ".ts"
+    ],
+    "include": [
+      "src/**/*.ts"
+    ],
+    "reporter": [
+      "html",
+      "text",
+      "lcov"
+    ],
+    "all": true
   }
 }
