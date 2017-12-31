@@ -1,2 +1,1 @@
-export {CircuitBreaker} from "./CircuitBreaker";
-export {Command} from "./Command";
+export { CircuitBreaker } from "./CircuitBreaker";

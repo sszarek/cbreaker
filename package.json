@@ -7,7 +7,7 @@
     "compile": "tsc",
     "build": "run-s clean lint test compile",
     "clean": "rimraf dist",
-    "lint": "tslint -c tslint.json src/**/*.ts",
+    "lint": "tslint -c tslint.json 'src/**/*.ts'",
     "test": "nyc mocha -r ts-node/register --r source-map-support/register -r tests/setup.ts './tests/**/*.ts'"
   },
   "author": "Stefan Szarek",

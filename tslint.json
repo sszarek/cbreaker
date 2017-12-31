@@ -6,7 +6,20 @@
     "jsRules": {},
     "rules": {
         "ordered-imports": false,
-        "object-literal-sort-keys": false
+        "object-literal-sort-keys": false,
+        "whitespace": [
+            true,
+            "check-branch",
+            "check-decl",
+            "check-operator",
+            "check-module",
+            "check-separator",
+            "check-rest-spread",
+            "check-type",
+            "check-typecast",
+            "check-type-operator",
+            "check-preblock"
+        ]
     },
     "rulesDirectory": []
 }
